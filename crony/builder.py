@@ -101,6 +101,8 @@ class Job(object):
 
     @property
     def expression(self):
+        if self._exp_fields[0][:1] == '@':
+            return self._exp_fields[0]
         return "{0} {1} {2} {3} {4}".format(
                         self.minute,
                         self.hour,
@@ -132,16 +134,26 @@ class Job(object):
 
         return cron_string
 
+    def strip_expression(self, job_line):
+        # check if normal or special expression
+        line_pieces = job_line.split()
+
+        if line_pieces[0].startswith('@'):
+            break_slice = 1
+        else:
+            break_slice = 5
+
+        # set the expression part
+        self.expression = line_pieces[:break_slice]
+
+        return ' '.join(line_pieces[break_slice:])
+
     @line.setter
     def line(self, job_line):
         """Parse a crontab line"""
-        crontab_pieces = job_line.split()
 
-        # set the expression part
-        self.expression = crontab_pieces[:5]
-
-        # set the latter part of the job
-        latter_part = ' '.join(crontab_pieces[5:])
+        # extract the cron expression form the job line
+        latter_part = self.strip_expression(job_line)
 
         # extract the comment part
         comment_start = latter_part.find('#')
