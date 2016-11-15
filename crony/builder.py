@@ -101,7 +101,7 @@ class Job(object):
 
     @property
     def expression(self):
-        if self._exp_fields[0][:1] == '@':
+        if self._exp_fields[0].startswith('@'):
             return self._exp_fields[0]
         return "{0} {1} {2} {3} {4}".format(
                         self.minute,
